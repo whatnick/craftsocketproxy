@@ -1,0 +1,17 @@
+{
+  "category.craftsocketproxy": "CraftSocketProxy",
+  "key.craftsocketproxy.open": "Open CraftSocketProxy Setup",
+  "screen.craftsocketproxy.title": "CraftSocketProxy",
+  "screen.craftsocketproxy.host": "WebSocket host",
+  "screen.craftsocketproxy.port": "WebSocket port",
+  "screen.craftsocketproxy.path": "WebSocket path",
+  "screen.craftsocketproxy.local_port": "Local Minecraft port",
+  "screen.craftsocketproxy.password": "Server password",
+  "screen.craftsocketproxy.start": "Start proxy",
+  "screen.craftsocketproxy.stop": "Stop proxy",
+  "screen.craftsocketproxy.done": "Done",
+  "message.craftsocketproxy.started": "CraftSocketProxy started. Join localhost:%s from Multiplayer.",
+  "message.craftsocketproxy.stopped": "CraftSocketProxy stopped.",
+  "message.craftsocketproxy.invalid": "Check host and port values.",
+  "message.craftsocketproxy.failed": "CraftSocketProxy failed: %s"
+}

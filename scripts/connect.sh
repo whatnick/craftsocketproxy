@@ -4,7 +4,7 @@ set -eu
 DEFAULT_SERVER="${CRAFTSOCKETPROXY_SERVER:-minecraft.farlongmc.com}"
 DEFAULT_PORT="${CRAFTSOCKETPROXY_PORT:-80}"
 LOCAL_PORT="${CRAFTSOCKETPROXY_LOCAL_PORT:-25565}"
-IMAGE="${CRAFTSOCKETPROXY_IMAGE:-ghcr.io/whatnick/craftsocketproxy:1.0.1-auth}"
+IMAGE="${CRAFTSOCKETPROXY_IMAGE:-ghcr.io/whatnick/craftsocketproxy:1.0.2-fabric}"
 FALLBACK_IMAGE="${CRAFTSOCKETPROXY_FALLBACK_IMAGE:-craftsocketproxy-client:local}"
 CONTAINER_NAME="${CRAFTSOCKETPROXY_CONTAINER:-craftsocketproxy-client}"
 
@@ -55,7 +55,7 @@ start_with_docker() {
 
 start_with_java() {
   if [ -z "${CRAFTSOCKETPROXY_JAR:-}" ]; then
-    echo 'Docker was not found. Set CRAFTSOCKETPROXY_JAR=/path/to/CraftSocketProxy-1.0.1-auth.jar to run with Java.' >&2
+    echo 'Docker was not found. Set CRAFTSOCKETPROXY_JAR=/path/to/CraftSocketProxy-1.0.2-fabric.jar to run with Java.' >&2
     exit 1
   fi
   java -jar "$CRAFTSOCKETPROXY_JAR" --c -host "$SERVER_HOST" -port "$SERVER_PORT" -proxy "$LOCAL_PORT" -password "$SERVER_PASSWORD" >/tmp/craftsocketproxy-client.log 2>&1 &

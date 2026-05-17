@@ -23,10 +23,26 @@ This roadmap tracks a future Minecraft Java client mod that connects directly to
 
 ### 1. Protocol Spike
 
-- Create a minimal Fabric mod for the currently targeted Minecraft version.
+- Create a minimal Fabric mod for the currently targeted Minecraft version. Initial scaffold lives in `fabric-client` and is enabled with `-PwithFabricClient=true`.
 - Verify where to intercept outbound multiplayer connections.
 - Prototype a Netty `ChannelDuplexHandler` that forwards Minecraft packets over WebSocket frames.
 - Reuse CraftSocketProxy framing semantics: binary WebSocket frames carry raw Minecraft protocol bytes.
+
+Current first slice:
+
+- Adds a Fabric client module for Minecraft `1.21.1`.
+- Adds an in-game CraftSocketProxy setup screen opened from an unbound keybind.
+- Starts the existing authenticated CraftSocketProxy client from inside Minecraft.
+- Saves non-secret host, port, path, and local port settings under Fabric config.
+- Does not store the server password.
+
+Build note: the module is opt-in so the existing standalone proxy build remains stable. Build it with:
+
+```bash
+./gradlew -PwithFabricClient=true :fabric-client:build
+```
+
+The Fabric build now works after removing the Foojay toolchain resolver from the settings plugin classpath. That resolver pulled Gson `2.9.1` ahead of Loom's Gson dependency and broke Minecraft manifest parsing.
 
 ### 2. Configuration UI
 

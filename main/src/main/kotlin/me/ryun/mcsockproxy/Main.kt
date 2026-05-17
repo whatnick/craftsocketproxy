@@ -16,7 +16,7 @@ val Boolean.int
     get() = this.compareTo(false)
 
 //Constant values
-const val VERSION = "1.0.1-auth"
+const val VERSION = "1.0.2-fabric"
 const val INVALID_HOSTNAME = "Missing or invalid hostname."
 const val INVALID_PORT = "Missing or invalid port."
 const val INVALID_PROXY_PORT = "Missing or invalid proxy port."

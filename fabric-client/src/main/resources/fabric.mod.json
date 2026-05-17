@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "id": "craftsocketproxy",
+  "version": "${version}",
+  "name": "CraftSocketProxy Client",
+  "description": "Starts an authenticated CraftSocketProxy client from inside Minecraft.",
+  "authors": [
+    "SSS Ryun",
+    "whatnick"
+  ],
+  "contact": {
+    "homepage": "https://github.com/whatnick/craftsocketproxy",
+    "sources": "https://github.com/whatnick/craftsocketproxy"
+  },
+  "license": "Apache-2.0",
+  "environment": "client",
+  "entrypoints": {
+    "client": [
+      "me.ryun.mcsockproxy.fabric.CraftSocketProxyClientMod"
+    ]
+  },
+  "depends": {
+    "fabricloader": ">=0.16.10",
+    "fabric-api": "*",
+    "minecraft": "~1.21.1",
+    "java": ">=21"
+  }
+}

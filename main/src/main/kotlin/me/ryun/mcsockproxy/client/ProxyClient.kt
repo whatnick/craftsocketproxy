@@ -22,7 +22,8 @@ import java.util.concurrent.atomic.AtomicReference
 class ProxyClient private constructor(
     private val configuration: CraftConnectionConfiguration,
     private val path: String,
-    private val password: String?) {
+    private val password: String?,
+    autoStart: Boolean = true) {
 
     private val group = NioEventLoopGroup()
     private var restartAttempts = 0
@@ -38,7 +39,8 @@ class ProxyClient private constructor(
         if(configuration.proxyPort == 0)
             throw IllegalConfigurationException("Proxy Port is not configured.")
 
-        start()
+        if(autoStart)
+            start()
     }
 
     companion object {
@@ -47,6 +49,18 @@ class ProxyClient private constructor(
          */
         fun serve(configuration: CraftConnectionConfiguration, path: String = "/", password: String? = null): ProxyClient {
             return ProxyClient(configuration, path, password)
+        }
+
+        /**
+         * Starts a client proxy on a daemon thread and returns immediately.
+         */
+        fun serveAsync(configuration: CraftConnectionConfiguration, path: String = "/", password: String? = null): ProxyClient {
+            val client = ProxyClient(configuration, path, password, false)
+            val thread = Thread({ client.start() }, "craftsocketproxy-client")
+            thread.isDaemon = true
+            thread.start()
+
+            return client
         }
     }
 

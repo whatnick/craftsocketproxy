@@ -57,7 +57,7 @@ The default server is `minecraft.farlongmc.com`. Players connect Minecraft Java 
 localhost:25565
 ```
 
-The scripts prefer Docker Desktop. They first try the published container image, then fall back to building from this public fork if the image is private or unavailable. If Docker is not installed, set `CRAFTSOCKETPROXY_JAR` to a local `CraftSocketProxy-1.0.1-auth.jar` and install Java.
+The scripts prefer Docker Desktop. They first try the published container image, then fall back to building from this public fork if the image is private or unavailable. If Docker is not installed, set `CRAFTSOCKETPROXY_JAR` to a local `CraftSocketProxy-1.0.2-fabric.jar` and install Java.
 
 **Proxy Client (no WebSockets)** `localhost:25565 -> localhost:25566`
 ```bash
@@ -75,7 +75,7 @@ java -jar CraftSocketProxy-1.0.1.jar --c -host example.com -port 80 -proxy 25565
 Add `-password <value>` when the server proxy requires a password:
 
 ```bash
-java -jar CraftSocketProxy-1.0.1-auth.jar --c -host example.com -port 80 -proxy 25565 -password <value>
+java -jar CraftSocketProxy-1.0.2-fabric.jar --c -host example.com -port 80 -proxy 25565 -password <value>
 ```
 
 > [!WARNING]
@@ -89,7 +89,7 @@ java -jar CraftSocketProxy-1.0.1.jar --s -host localhost -port 25565 -proxy 80
 The server can require a password during the WebSocket handshake:
 
 ```bash
-java -jar CraftSocketProxy-1.0.1-auth.jar --s -host localhost -port 25565 -proxy 80 -password <value>
+java -jar CraftSocketProxy-1.0.2-fabric.jar --s -host localhost -port 25565 -proxy 80 -password <value>
 ```
 
 The server password can also come from the `CRAFTSOCKETPROXY_PASSWORD` environment variable.
@@ -119,7 +119,8 @@ Arguments:
 This fork publishes a multi-architecture container image for running the server-side WebSocket proxy in Kubernetes:
 
 ```text
-ghcr.io/whatnick/craftsocketproxy:1.0.1-auth
+ghcr.io/whatnick/craftsocketproxy:1.0.2-fabric
+ghcr.io/whatnick/craftsocketproxy:1.0.2
 ghcr.io/whatnick/craftsocketproxy:1.0.1
 ghcr.io/whatnick/craftsocketproxy:latest
 ```
@@ -143,7 +144,8 @@ Publish manually:
 
 ```bash
 docker buildx build --platform linux/amd64,linux/arm64 \
-       -t ghcr.io/whatnick/craftsocketproxy:1.0.1-auth \
+       -t ghcr.io/whatnick/craftsocketproxy:1.0.2-fabric \
+       -t ghcr.io/whatnick/craftsocketproxy:1.0.2 \
        -t ghcr.io/whatnick/craftsocketproxy:1.0.1 \
        -t ghcr.io/whatnick/craftsocketproxy:latest \
        --push .
@@ -157,6 +159,14 @@ want to use this as a dependency and create your own plugin or mod or whatever.
 ## Client Mod Roadmap
 
 See [docs/client-mod-roadmap.md](docs/client-mod-roadmap.md) for the roadmap to package CraftSocketProxy as a client-side Minecraft mod.
+
+The first Fabric client implementation is scaffolded under `fabric-client`. It is opt-in so the standalone proxy build stays lightweight:
+
+```bash
+./gradlew -PwithFabricClient=true :fabric-client:build
+```
+
+The current mod slice opens a CraftSocketProxy setup screen from an unbound keybind, starts the authenticated local proxy from inside Minecraft, and stores only non-secret connection settings. The server password is entered per session and is not written to config. The Fabric module builds alongside the standalone proxy when enabled with `-PwithFabricClient=true`.
 
 # DISCLAIMER
 ```

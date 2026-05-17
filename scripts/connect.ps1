@@ -13,7 +13,7 @@ if ($server -match '^(?<host>.+):(?<port>\d+)$') {
 }
 
 $localPort = if ($env:CRAFTSOCKETPROXY_LOCAL_PORT) { [int]$env:CRAFTSOCKETPROXY_LOCAL_PORT } else { 25565 }
-$image = if ($env:CRAFTSOCKETPROXY_IMAGE) { $env:CRAFTSOCKETPROXY_IMAGE } else { 'ghcr.io/whatnick/craftsocketproxy:1.0.1-auth' }
+$image = if ($env:CRAFTSOCKETPROXY_IMAGE) { $env:CRAFTSOCKETPROXY_IMAGE } else { 'ghcr.io/whatnick/craftsocketproxy:1.0.2-fabric' }
 $fallbackImage = if ($env:CRAFTSOCKETPROXY_FALLBACK_IMAGE) { $env:CRAFTSOCKETPROXY_FALLBACK_IMAGE } else { 'craftsocketproxy-client:local' }
 $containerName = if ($env:CRAFTSOCKETPROXY_CONTAINER) { $env:CRAFTSOCKETPROXY_CONTAINER } else { 'craftsocketproxy-client' }
 

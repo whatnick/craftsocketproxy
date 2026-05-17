@@ -1,29 +1,17 @@
-import org.jetbrains.kotlin.gradle.dsl.jvm.JvmTargetValidationMode
-import org.jetbrains.kotlin.gradle.tasks.KotlinJvmCompile
-
 plugins {
-    kotlin("jvm") version "2.1.0"
-}
-
-kotlin {
-    jvmToolchain(8)
+    java
 }
 
 group = "me.ryun.mcsockproxy"
-version = "1.0.1"
+version = "1.0.2"
 
 repositories {
     mavenCentral()
 }
 
 dependencies {
-    testImplementation("org.jetbrains.kotlin:kotlin-test")
     implementation("io.netty:netty-codec-http:4.1.107.Final")
     implementation(project(":main"))
-}
-
-tasks.test {
-    useJUnitPlatform()
 }
 
 tasks.getByName<Jar>("jar") {
@@ -35,8 +23,4 @@ tasks.getByName<Jar>("jar") {
     manifest {
         attributes["Main-Class"] = "me.ryun.mcsockproxy.MainKt"
     }
-}
-
-tasks.withType<KotlinJvmCompile>().configureEach {
-    jvmTargetValidationMode.set(JvmTargetValidationMode.WARNING)
 }
