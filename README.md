@@ -75,6 +75,37 @@ Arguments:
 > [!WARNING]
 > The path requires a `/` at the beginning. `-path /minecraft`
 
+## Container Image
+
+This fork publishes a multi-architecture container image for running the server-side WebSocket proxy in Kubernetes:
+
+```text
+ghcr.io/whatnick/craftsocketproxy:1.0.1
+ghcr.io/whatnick/craftsocketproxy:latest
+```
+
+Default container arguments proxy the in-cluster Minecraft Service to WebSocket port `8080`:
+
+```bash
+--s -host minecraft.minecraft.svc.cluster.local -port 25565 -proxy 8080
+```
+
+Build locally:
+
+```bash
+docker build -t craftsocketproxy:local .
+docker run --rm craftsocketproxy:local --version
+```
+
+Publish manually:
+
+```bash
+docker buildx build --platform linux/amd64,linux/arm64 \
+       -t ghcr.io/whatnick/craftsocketproxy:1.0.1 \
+       -t ghcr.io/whatnick/craftsocketproxy:latest \
+       --push .
+```
+
 ### Examples
 
 I have made three [examples](https://github.com/sss-ryun/craftsocketproxy/tree/master/examples/src/main/kotlin/) if you
