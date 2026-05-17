@@ -28,11 +28,11 @@ public final class CraftSocketProxyClientMod implements ClientModInitializer {
         });
     }
 
-    static void openScreen(MinecraftClient client) {
+    public static void openScreen(MinecraftClient client) {
         client.setScreen(new CraftSocketProxyScreen(client.currentScreen));
     }
 
-    static void sendStatus(Text message) {
+    public static void sendStatus(Text message) {
         MinecraftClient client = MinecraftClient.getInstance();
         if(client.player != null) {
             client.player.sendMessage(message, false);

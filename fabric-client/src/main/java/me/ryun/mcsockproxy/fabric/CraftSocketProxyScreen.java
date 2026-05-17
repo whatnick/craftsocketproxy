@@ -2,12 +2,20 @@ package me.ryun.mcsockproxy.fabric;
 
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.gui.screen.multiplayer.ConnectScreen;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.gui.widget.TextFieldWidget;
+import net.minecraft.client.network.CookieStorage;
+import net.minecraft.client.network.ServerAddress;
+import net.minecraft.client.network.ServerInfo;
 import net.minecraft.screen.ScreenTexts;
+import net.minecraft.text.OrderedText;
+import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 
 import java.io.IOException;
+import java.time.Duration;
+import java.util.Map;
 
 public final class CraftSocketProxyScreen extends Screen {
     private final Screen parent;
@@ -16,6 +24,9 @@ public final class CraftSocketProxyScreen extends Screen {
     private TextFieldWidget pathField;
     private TextFieldWidget localPortField;
     private TextFieldWidget passwordField;
+    private ButtonWidget startButton;
+    private ButtonWidget joinButton;
+    private ButtonWidget stopButton;
     private Text statusText = Text.literal(EmbeddedProxySession.status());
 
     public CraftSocketProxyScreen(Screen parent) {
@@ -41,16 +52,21 @@ public final class CraftSocketProxyScreen extends Screen {
         top += 34;
         passwordField = textField(left, top, fieldWidth, fieldHeight, Text.translatable("screen.craftsocketproxy.password"), "");
         passwordField.setMaxLength(256);
+        passwordField.setRenderTextProvider((text, firstCharacterIndex) -> OrderedText.styledForwardsVisitedString("*".repeat(text.length()), Style.EMPTY));
         top += 32;
 
-        addDrawableChild(ButtonWidget.builder(Text.translatable("screen.craftsocketproxy.start"), button -> startProxy())
+        startButton = addDrawableChild(ButtonWidget.builder(Text.translatable("screen.craftsocketproxy.start"), button -> startProxy())
             .dimensions(left, top, 106, 20)
             .build());
-        addDrawableChild(ButtonWidget.builder(Text.translatable("screen.craftsocketproxy.stop"), button -> {
+        stopButton = addDrawableChild(ButtonWidget.builder(Text.translatable("screen.craftsocketproxy.stop"), button -> {
             EmbeddedProxySession.stop();
             statusText = Text.translatable("message.craftsocketproxy.stopped");
             CraftSocketProxyClientMod.sendStatus(statusText);
         }).dimensions(left + 114, top, 106, 20).build());
+        top += 28;
+        joinButton = addDrawableChild(ButtonWidget.builder(Text.translatable("screen.craftsocketproxy.connect"), button -> startProxyAndJoin())
+            .dimensions(left, top, fieldWidth, 20)
+            .build());
         top += 28;
         addDrawableChild(ButtonWidget.builder(ScreenTexts.DONE, button -> close())
             .dimensions(left, top, fieldWidth, 20)
@@ -80,6 +96,64 @@ public final class CraftSocketProxyScreen extends Screen {
             statusText = Text.translatable("message.craftsocketproxy.failed", cause.getMessage() == null ? cause.getClass().getSimpleName() : cause.getMessage());
             CraftSocketProxyClientMod.sendStatus(statusText);
         }
+    }
+
+    private void startProxyAndJoin() {
+        CraftSocketProxySettings settings = readSettings();
+        if(settings == null || client == null) {
+            return;
+        }
+
+        setBusy(true);
+        statusText = Text.translatable("screen.craftsocketproxy.waiting");
+        try {
+            CraftSocketProxyConfig.save(settings);
+        } catch(IOException cause) {
+            statusText = Text.translatable("message.craftsocketproxy.failed", cause.getMessage() == null ? cause.getClass().getSimpleName() : cause.getMessage());
+            setBusy(false);
+            return;
+        }
+
+        Thread connector = new Thread(() -> {
+            try {
+                int localPort = EmbeddedProxySession.startAndWait(settings, Duration.ofSeconds(12));
+                client.execute(() -> joinLocalServer(localPort));
+            } catch(IOException | InterruptedException | RuntimeException cause) {
+                if(cause instanceof InterruptedException) {
+                    Thread.currentThread().interrupt();
+                }
+                client.execute(() -> {
+                    statusText = Text.translatable("message.craftsocketproxy.failed", cause.getMessage() == null ? cause.getClass().getSimpleName() : cause.getMessage());
+                    CraftSocketProxyClientMod.sendStatus(statusText);
+                    setBusy(false);
+                });
+            }
+        }, "craftsocketproxy-login");
+        connector.setDaemon(true);
+        connector.start();
+    }
+
+    private void joinLocalServer(int localPort) {
+        if(client == null) {
+            return;
+        }
+
+        String address = "localhost:" + localPort;
+        statusText = Text.translatable("message.craftsocketproxy.joining", localPort);
+        CraftSocketProxyClientMod.sendStatus(statusText);
+        ServerInfo serverInfo = new ServerInfo("CraftSocketProxy", address, ServerInfo.ServerType.OTHER);
+        ConnectScreen.connect(this, client, ServerAddress.parse(address), serverInfo, false, new CookieStorage(Map.of()));
+    }
+
+    private void setBusy(boolean busy) {
+        hostField.active = !busy;
+        portField.active = !busy;
+        pathField.active = !busy;
+        localPortField.active = !busy;
+        passwordField.active = !busy;
+        startButton.active = !busy;
+        joinButton.active = !busy;
+        stopButton.active = !busy;
     }
 
     private CraftSocketProxySettings readSettings() {
@@ -117,6 +191,7 @@ public final class CraftSocketProxyScreen extends Screen {
         drawLabel(context, pathField, Text.translatable("screen.craftsocketproxy.path"));
         drawLabel(context, localPortField, Text.translatable("screen.craftsocketproxy.local_port"));
         drawLabel(context, passwordField, Text.translatable("screen.craftsocketproxy.password"));
+        context.drawCenteredTextWithShadow(textRenderer, Text.translatable("screen.craftsocketproxy.address", localPortField.getText()), width / 2, passwordField.getY() + 28, 0xC0C0C0);
         context.drawCenteredTextWithShadow(textRenderer, statusText, width / 2, height - 28, 0xA0FFA0);
         super.render(context, mouseX, mouseY, delta);
     }

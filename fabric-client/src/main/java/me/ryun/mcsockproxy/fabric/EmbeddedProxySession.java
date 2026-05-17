@@ -3,6 +3,11 @@ package me.ryun.mcsockproxy.fabric;
 import me.ryun.mcsockproxy.client.ProxyClient;
 import me.ryun.mcsockproxy.common.CraftConnectionConfiguration;
 
+import java.io.IOException;
+import java.net.InetSocketAddress;
+import java.net.Socket;
+import java.time.Duration;
+
 public final class EmbeddedProxySession {
     private static final Object LOCK = new Object();
     private static ProxyClient proxyClient;
@@ -34,6 +39,27 @@ public final class EmbeddedProxySession {
         }
 
         return settings.localPort();
+    }
+
+    public static int startAndWait(CraftSocketProxySettings settings, Duration timeout) throws IOException, InterruptedException {
+        int localPort = start(settings);
+        long deadline = System.nanoTime() + timeout.toNanos();
+        IOException lastFailure = null;
+
+        while(System.nanoTime() < deadline) {
+            try(Socket socket = new Socket()) {
+                socket.connect(new InetSocketAddress("127.0.0.1", localPort), 250);
+                return localPort;
+            } catch(IOException failure) {
+                lastFailure = failure;
+                Thread.sleep(100L);
+            }
+        }
+
+        if(lastFailure != null) {
+            throw lastFailure;
+        }
+        throw new IOException("Timed out waiting for localhost:" + localPort);
     }
 
     public static void stop() {

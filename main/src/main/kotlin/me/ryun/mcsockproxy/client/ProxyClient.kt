@@ -27,8 +27,6 @@ class ProxyClient private constructor(
 
     private val group = NioEventLoopGroup()
     private var restartAttempts = 0
-    private var successRestarts = 0
-    private var maxFailedRestarts = 5
     private var maxRestarts = 5 //How many restarts to do if suddenly disconnected.
 
     init {
@@ -103,12 +101,7 @@ class ProxyClient private constructor(
 
                 //TODO: Handle connection timeouts
 
-                channel.closeFuture().addListener {
-                    if(it.isSuccess) {
-                        successRestarts = 0
-                    }
-                    scheduleRestart()
-                }
+                channel.closeFuture().addListener { scheduleRestart() }
             }
 
             println(CraftSocketConstants.PROXYING + ": " + (if(channel != null) "ws://" else "") + configuration.host + ":" + configuration.port + " -> localhost:" + configuration.proxyPort)
@@ -136,16 +129,14 @@ class ProxyClient private constructor(
      * Schedules a quick restart for a sudden disconnection.
      */
     private fun scheduleRestart() {
-        if(maxFailedRestarts > restartAttempts++ && maxRestarts > successRestarts++) {
-            restartAttempts = 0
+        if(maxRestarts > restartAttempts++ && !(group.isShutdown || group.isShuttingDown || group.isTerminated)) {
             group.schedule({
                 if(!(group.isShutdown || group.isShuttingDown || group.isTerminated)) {
                     println(CraftSocketConstants.CONNECTION_RESTART)
                     start()
                 }
-            }, 1, TimeUnit.MILLISECONDS)
+            }, 1, TimeUnit.SECONDS)
         } else {
-            successRestarts = 0
             println(CraftSocketConstants.TOO_MANY_RESTARTS)
             shutdown()
         }

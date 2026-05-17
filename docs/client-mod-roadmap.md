@@ -31,10 +31,12 @@ This roadmap tracks a future Minecraft Java client mod that connects directly to
 Current first slice:
 
 - Adds a Fabric client module for Minecraft `1.21.1`.
-- Adds an in-game CraftSocketProxy setup screen opened from an unbound keybind.
+- Adds an in-game CraftSocketProxy login screen opened from an unbound keybind or from the Multiplayer screen.
 - Starts the existing authenticated CraftSocketProxy client from inside Minecraft.
+- Can start the embedded proxy, wait for `localhost:<port>`, and hand off to Minecraft's normal connect screen.
 - Saves non-secret host, port, path, and local port settings under Fabric config.
 - Does not store the server password.
+- Masks the password field in the client UI.
 
 Build note: the module is opt-in so the existing standalone proxy build remains stable. Build it with:
 
@@ -46,9 +48,9 @@ The Fabric build now works after removing the Foojay toolchain resolver from the
 
 ### 2. Configuration UI
 
-- Add a `WebSocket Server` button or edit screen option in Multiplayer.
-- Capture hostname, port, path, and local display name.
-- Prompt for password at connect time rather than storing it by default.
+- Add a `WebSocket Server` button or edit screen option in Multiplayer. Initial button is now present as `CraftSocketProxy`.
+- Capture hostname, port, path, and local display name. Host, port, path, and local port are implemented; display name is still pending.
+- Prompt for password at connect time rather than storing it by default. Implemented for the embedded-proxy flow.
 - Optionally support OS keychain storage later.
 
 ### 3. Authentication And Security
