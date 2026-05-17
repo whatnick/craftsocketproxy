@@ -13,7 +13,8 @@ import me.ryun.mcsockproxy.common.CraftConnectionConfiguration
  */
 internal class ServerInitializer(
     private val configuration: CraftConnectionConfiguration,
-    private val path: String = "/"): ChannelInitializer<SocketChannel>() {
+    private val path: String = "/",
+    private val password: String? = null): ChannelInitializer<SocketChannel>() {
 
     /**
      * Called when the Channel is initialized for the first time.
@@ -22,7 +23,7 @@ internal class ServerInitializer(
         val pipeline = channel.pipeline()
         pipeline.addLast(HttpServerCodec())
         pipeline.addLast(HttpObjectAggregator(2048))
-        pipeline.addLast(ServerPageHandler(path))
+        pipeline.addLast(ServerPageHandler(path, password))
         pipeline.addLast(WebSocketServerCompressionHandler())
         pipeline.addLast(WebSocketServerProtocolHandler(path, "", true))
         pipeline.addLast(ServerFrameHandler())

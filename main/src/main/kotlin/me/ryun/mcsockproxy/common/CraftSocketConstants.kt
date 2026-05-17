@@ -28,5 +28,6 @@ internal class CraftSocketConstants private constructor() {
         const val TOO_MANY_RESTARTS = "Too many failed restart attempts."
         const val UNSUPPORTED_HTTP_RESPONSE = "Unsupported HTTP response!"
         const val UNSUPPORTED_WEBSOCKET_FRAME = "Unsupported frame received! Disconnected."
+        const val PASSWORD_HEADER = "X-CraftSocketProxy-Password"
     }
 }

@@ -48,6 +48,12 @@ java -jar CraftSocketProxy-1.0.1.jar --c -host localhost -port 25565 -proxy 2556
 java -jar CraftSocketProxy-1.0.1.jar --c -host example.com -port 80 -proxy 25565
 ```
 
+Add `-password <value>` when the server proxy requires a password:
+
+```bash
+java -jar CraftSocketProxy-1.0.1-auth.jar --c -host example.com -port 80 -proxy 25565 -password <value>
+```
+
 > [!WARNING]
 > If the supplied port for the client is 80 or 443, then it will automatically attempt to connect to the host through a WebSocket connection.
 
@@ -55,6 +61,14 @@ java -jar CraftSocketProxy-1.0.1.jar --c -host example.com -port 80 -proxy 25565
 ```bash
 java -jar CraftSocketProxy-1.0.1.jar --s -host localhost -port 25565 -proxy 80
 ```
+
+The server can require a password during the WebSocket handshake:
+
+```bash
+java -jar CraftSocketProxy-1.0.1-auth.jar --s -host localhost -port 25565 -proxy 80 -password <value>
+```
+
+The server password can also come from the `CRAFTSOCKETPROXY_PASSWORD` environment variable.
 
 > [!IMPORTANT]
 > If you already have a server using the port 80 and 443, use a different port and reverse proxy it to a different path.
@@ -69,6 +83,7 @@ Arguments:
 -port  <Port>     | Port of Host
 -proxy <Port>     | Output port of Proxy
 -path  <Path>     | (Optional) Path of WebSocket connection
+-password <Value> | (Optional) Password sent during WebSocket handshake
 --version         | Query version
 ```
 
@@ -80,6 +95,7 @@ Arguments:
 This fork publishes a multi-architecture container image for running the server-side WebSocket proxy in Kubernetes:
 
 ```text
+ghcr.io/whatnick/craftsocketproxy:1.0.1-auth
 ghcr.io/whatnick/craftsocketproxy:1.0.1
 ghcr.io/whatnick/craftsocketproxy:latest
 ```
@@ -89,6 +105,8 @@ Default container arguments proxy the in-cluster Minecraft Service to WebSocket 
 ```bash
 --s -host minecraft.minecraft.svc.cluster.local -port 25565 -proxy 8080
 ```
+
+To require a password in Kubernetes, set `CRAFTSOCKETPROXY_PASSWORD` from a Secret and add `-password $(CRAFTSOCKETPROXY_PASSWORD)` to the container arguments.
 
 Build locally:
 
@@ -101,6 +119,7 @@ Publish manually:
 
 ```bash
 docker buildx build --platform linux/amd64,linux/arm64 \
+       -t ghcr.io/whatnick/craftsocketproxy:1.0.1-auth \
        -t ghcr.io/whatnick/craftsocketproxy:1.0.1 \
        -t ghcr.io/whatnick/craftsocketproxy:latest \
        --push .

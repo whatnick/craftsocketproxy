@@ -5,11 +5,14 @@ import io.netty.channel.ChannelFutureListener
 import io.netty.channel.ChannelHandlerContext
 import io.netty.channel.SimpleChannelInboundHandler
 import io.netty.handler.codec.http.*
+import me.ryun.mcsockproxy.common.CraftSocketConstants
 
 /**
  * A Handler for all HTTP requests to the server. Responds Forbidden to all non-WebSocket requests.
  */
-internal class ServerPageHandler(private val path: String = "/"): SimpleChannelInboundHandler<FullHttpRequest>() {
+internal class ServerPageHandler(
+    private val path: String = "/",
+    private val password: String? = null): SimpleChannelInboundHandler<FullHttpRequest>() {
 
     override fun channelRead0(context: ChannelHandlerContext, request: FullHttpRequest) {
         if(request.decoderResult().isFailure) {
@@ -23,6 +26,16 @@ internal class ServerPageHandler(private val path: String = "/"): SimpleChannelI
         }
 
         if(request.headers().contains(HttpHeaderNames.UPGRADE, HttpHeaderValues.WEBSOCKET, true)) {
+            if(!password.isNullOrBlank() && request.headers().get(CraftSocketConstants.PASSWORD_HEADER) != password) {
+                sendHttpResponse(
+                    context,
+                    request,
+                    DefaultFullHttpResponse(request.protocolVersion(), HttpResponseStatus.UNAUTHORIZED, context.alloc().buffer(0))
+                )
+
+                return
+            }
+
             context.fireChannelRead(request.retain())
 
             return

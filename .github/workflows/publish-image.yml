@@ -47,5 +47,6 @@ jobs:
           platforms: linux/amd64,linux/arm64
           push: true
           tags: |
+            ${{ env.IMAGE_NAME }}:1.0.1-auth
             ${{ env.IMAGE_NAME }}:1.0.1
             ${{ env.IMAGE_NAME }}:latest

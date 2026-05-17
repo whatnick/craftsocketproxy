@@ -21,7 +21,8 @@ import java.util.concurrent.atomic.AtomicReference
  */
 class ProxyClient private constructor(
     private val configuration: CraftConnectionConfiguration,
-    private val path: String) {
+    private val path: String,
+    private val password: String?) {
 
     private val group = NioEventLoopGroup()
     private var restartAttempts = 0
@@ -44,8 +45,8 @@ class ProxyClient private constructor(
         /**
          * Returns a WebSocket game frame from a proxy server back to its original game frame.
          */
-        fun serve(configuration: CraftConnectionConfiguration, path: String = "/"): ProxyClient {
-            return ProxyClient(configuration, path)
+        fun serve(configuration: CraftConnectionConfiguration, path: String = "/", password: String? = null): ProxyClient {
+            return ProxyClient(configuration, path, password)
         }
     }
 
@@ -64,13 +65,17 @@ class ProxyClient private constructor(
 
                 println(CraftSocketConstants.CONNECTION_ATTEMPT + " $wsURI")
 
+                val headers = DefaultHttpHeaders()
+                if(!password.isNullOrBlank())
+                    headers.set(CraftSocketConstants.PASSWORD_HEADER, password)
+
                 val handler = ClientInboundConnectionHandler(
                     WebSocketClientHandshakerFactory.newHandshaker(
                         wsURI,
                         WebSocketVersion.V13,
                         "",
                         true,
-                        DefaultHttpHeaders()
+                        headers
                     )
                 )
 

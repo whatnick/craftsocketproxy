@@ -10,7 +10,7 @@ import me.ryun.mcsockproxy.common.IllegalConfigurationException
 /**
  * Proxies a game frame to a WebSocket frame.
  */
-class ProxyServer private constructor(configuration: CraftConnectionConfiguration, path: String) {
+class ProxyServer private constructor(configuration: CraftConnectionConfiguration, path: String, password: String?) {
     init {
         if(configuration.host.isNullOrEmpty())
             throw IllegalConfigurationException("Host is not configured.")
@@ -26,7 +26,7 @@ class ProxyServer private constructor(configuration: CraftConnectionConfiguratio
         try {
             bootstrap.group(bossGroup, workerGroup)
                 .channel(NioServerSocketChannel::class.java)
-                .childHandler(ServerInitializer(configuration, path))
+                .childHandler(ServerInitializer(configuration, path, password))
 
             val channel = bootstrap.bind(configuration.proxyPort).sync().channel()
 
@@ -44,8 +44,8 @@ class ProxyServer private constructor(configuration: CraftConnectionConfiguratio
         /**
          * Proxy game through WebSocket.
          */
-        fun serve(configuration: CraftConnectionConfiguration, path: String = "/"): ProxyServer {
-            return ProxyServer(configuration, path)
+        fun serve(configuration: CraftConnectionConfiguration, path: String = "/", password: String? = null): ProxyServer {
+            return ProxyServer(configuration, path, password)
         }
     }
 }

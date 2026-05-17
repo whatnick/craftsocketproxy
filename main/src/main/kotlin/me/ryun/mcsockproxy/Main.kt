@@ -16,12 +16,13 @@ val Boolean.int
     get() = this.compareTo(false)
 
 //Constant values
-const val VERSION = "1.0.1"
+const val VERSION = "1.0.1-auth"
 const val INVALID_HOSTNAME = "Missing or invalid hostname."
 const val INVALID_PORT = "Missing or invalid port."
 const val INVALID_PROXY_PORT = "Missing or invalid proxy port."
 const val STARTING_SERVER = "Starting proxy server..."
 const val STARTING_CLIENT = "Starting proxy client..."
+const val PASSWORD_ENV = "CRAFTSOCKETPROXY_PASSWORD"
 
 /**
  * The main code. This is where the code is executed for the standalone version
@@ -73,15 +74,16 @@ fun main(args: Array<String>) {
     val port = getInt(args, "-port")
     val proxyPort = getInt(args, "-proxy")
     val path = if(hasPath) getString(args, "-path") else "/"
+    val password = getOptionalRawString(args, "-password") ?: System.getenv(PASSWORD_ENV)?.takeIf { it.isNotBlank() }
 
     if(doServer) {
         println(STARTING_SERVER)
         val config = CraftConnectionConfiguration(proxyPort, hostname, port)
-        ProxyServer.serve(config, path)
+        ProxyServer.serve(config, path, password)
     } else {
         println(STARTING_CLIENT)
         val config = CraftConnectionConfiguration(proxyPort, hostname, port)
-        ProxyClient.serve(config, path)
+        ProxyClient.serve(config, path, password)
     }
 }
 
@@ -98,6 +100,7 @@ fun printHelp() {
             -port  <Port>     | Port of Host
             -proxy <Port>     | Output port of Proxy
             -path  <Path>     | (Optional) Path of WebSocket connection
+            -password <Value> | (Optional) Password sent during WebSocket handshake
             --version         | Query version
         """.trimIndent()
     )
@@ -158,4 +161,18 @@ fun hasValidString(args: Array<String>, arg: String): Boolean {
  */
 fun getString(args: Array<String>, arg: String): String {
     return args[args.indexOf(arg) + 1]
+}
+
+/**
+ * Returns the raw String after the `arg` value when present.
+ */
+fun getOptionalRawString(args: Array<String>, arg: String): String? {
+    val hasArg = args.contains(arg)
+    if(!hasArg)
+        return null
+    val argIndex = args.indexOf(arg) + 1
+    if(argIndex >= args.size)
+        return null
+
+    return args[argIndex]
 }
