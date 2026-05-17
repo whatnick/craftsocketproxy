@@ -35,6 +35,30 @@ Start off by downloading a build from [Releases](https://github.com/sss-ryun/cra
 
 ### Run the jar with the following commands
 
+### One-command player setup
+
+The helper scripts do not contain a server password. They prompt for the server address and password on the player's computer, start a local proxy on `localhost:25565`, then try to open Minecraft Launcher.
+
+PowerShell on Windows:
+
+```powershell
+irm https://raw.githubusercontent.com/whatnick/craftsocketproxy/master/scripts/connect.ps1 | iex
+```
+
+Bash on macOS, Linux, or Git Bash:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/whatnick/craftsocketproxy/master/scripts/connect.sh | sh
+```
+
+The default server is `minecraft.farlongmc.com`. Players connect Minecraft Java Edition to:
+
+```text
+localhost:25565
+```
+
+The scripts prefer Docker Desktop. They first try the published container image, then fall back to building from this public fork if the image is private or unavailable. If Docker is not installed, set `CRAFTSOCKETPROXY_JAR` to a local `CraftSocketProxy-1.0.1-auth.jar` and install Java.
+
 **Proxy Client (no WebSockets)** `localhost:25565 -> localhost:25566`
 ```bash
 java -jar CraftSocketProxy-1.0.1.jar --c -host localhost -port 25565 -proxy 25566
@@ -129,6 +153,10 @@ docker buildx build --platform linux/amd64,linux/arm64 \
 
 I have made three [examples](https://github.com/sss-ryun/craftsocketproxy/tree/master/examples/src/main/kotlin/) if you
 want to use this as a dependency and create your own plugin or mod or whatever.
+
+## Client Mod Roadmap
+
+See [docs/client-mod-roadmap.md](docs/client-mod-roadmap.md) for the roadmap to package CraftSocketProxy as a client-side Minecraft mod.
 
 # DISCLAIMER
 ```
